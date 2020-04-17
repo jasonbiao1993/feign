@@ -81,11 +81,14 @@ final class SynchronousMethodHandler implements MethodHandler {
 
   @Override
   public Object invoke(Object[] argv) throws Throwable {
+    // 1.根据请求参数创建一个feign.RequestTemplate
     RequestTemplate template = buildTemplateFromArgs.create(argv);
     Options options = findOptions(argv);
+    // 2.用户定义的重试策略
     Retryer retryer = this.retryer.clone();
     while (true) {
       try {
+        // 2. 具体执行
         return executeAndDecode(template, options);
       } catch (RetryableException e) {
         try {
@@ -107,6 +110,8 @@ final class SynchronousMethodHandler implements MethodHandler {
   }
 
   Object executeAndDecode(RequestTemplate template, Options options) throws Throwable {
+    // 1.封装请求信息，feign.Request，会将请求封装为以下信息
+    // GET https://... HTTP/1.1
     Request request = targetRequest(template);
 
     if (logLevel != Logger.Level.NONE) {
@@ -116,6 +121,7 @@ final class SynchronousMethodHandler implements MethodHandler {
     Response response;
     long start = System.nanoTime();
     try {
+      // 具体执行，例如 LoadBalancerFeignClient
       response = client.execute(request, options);
       // ensure the request is set. TODO: remove in Feign 12
       response = response.toBuilder()

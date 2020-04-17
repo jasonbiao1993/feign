@@ -270,6 +270,7 @@ public abstract class Feign {
     }
 
     public Feign build() {
+      // 能力包装，具体看 Capability 实现类的 enrich 方法
       Client client = Capability.enrich(this.client, capabilities);
       Retryer retryer = Capability.enrich(this.retryer, capabilities);
       List<RequestInterceptor> requestInterceptors = this.requestInterceptors.stream()
@@ -284,6 +285,7 @@ public abstract class Feign {
           Capability.enrich(this.invocationHandlerFactory, capabilities);
       QueryMapEncoder queryMapEncoder = Capability.enrich(this.queryMapEncoder, capabilities);
 
+      // 构建 Feign 处理对象
       SynchronousMethodHandler.Factory synchronousMethodHandlerFactory =
           new SynchronousMethodHandler.Factory(client, retryer, requestInterceptors, logger,
               logLevel, decode404, closeAfterDecode, propagationPolicy, forceDecoding);
